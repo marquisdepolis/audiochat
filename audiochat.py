@@ -1,4 +1,5 @@
 # %%
+import sys
 import traceback
 import sounddevice as sd
 from gtts import gTTS
@@ -14,10 +15,10 @@ from callgpt import Ask
 import warnings
 import logging
 import wave
+from dotenv import load_dotenv
 
+load_dotenv()
 logger = logging.getLogger(__name__)
-
-# Catch warnings
 
 
 def fxn():
@@ -27,17 +28,6 @@ def fxn():
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     fxn()
-
-
-def open_file(filepath):
-    with open(filepath, 'r', encoding='utf-8') as infile:
-        return infile.read()
-
-
-os.environ["OPENAI_API_KEY"] = open_file('openai_api_key.txt')
-openai.api_key = open_file('openai_api_key.txt')
-openai_api_key = openai.api_key
-
 
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
@@ -136,7 +126,7 @@ def get_gpt3_response(text):
         return None
 
     chatbot = Ask()
-    prompt = f"This was said by my six year old son. Note he loves science and animals and history and archeology and flags and continents and countries. Don't make any reference to this, but any reply to his question later has to be age appropriate: '{text}'"
+    prompt = f"This was said by my six year old son. Reply to him directly in maximum 3 sentences. But note any reply to his question has to be age appropriate: '{text}'"
     response = chatbot.gpt_creative(prompt)
     return response
 
@@ -177,8 +167,23 @@ def synthesize_speech_with_gtts(text, file_name='output_audio.wav'):
     return file_name
 
 
+def get_user_input(prompt):
+    if sys.version_info[0] < 3:
+        return raw_input(prompt)
+    else:
+        return input(prompt)
+
+
 while True:
     try:
+        user_input = get_user_input("Press 'r' to record, 'q' to quit: ")
+        if user_input.lower() == 'q':
+            print("Exiting...")
+            break
+        elif user_input.lower() != 'r':
+            print("Invalid input. Please press 'r' to record or 'q' to quit.")
+            continue
+
         audio_data = record_audio()
         transcription = transcribe_audio(audio_data)
         print(f"Transcription: {transcription}")

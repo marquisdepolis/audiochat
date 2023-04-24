@@ -1,5 +1,6 @@
 # %%
 # Need to edit so each function call saves both the query and the output in a csv file, along with what function was called
+from dotenv import load_dotenv
 import openai
 import os
 from datetime import datetime
@@ -10,17 +11,7 @@ import warnings
 
 logger = logging.getLogger(__name__)
 
-
-def open_file(filepath):
-    with open(filepath, 'r', encoding='utf-8') as infile:
-        return infile.read()
-
-
-# directory = filedialog.askdirectory()
-# os.chdir(directory)
-os.environ["OPENAI_API_KEY"] = open_file('openai_api_key.txt')
-openai.api_key = open_file('openai_api_key.txt')
-openai_api_key = openai.api_key
+load_dotenv()
 # ignore all warnings
 warnings.filterwarnings("ignore")
 
