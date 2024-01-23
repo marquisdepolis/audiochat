@@ -32,9 +32,6 @@ audio = pyaudio.PyAudio()
 # Get device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# List available 🐸TTS models
-print(TTS().list_models())
-
 # Init TTS with the target model name
 tts = TTS(model_name="tts_models/de/thorsten/tacotron2-DDC", progress_bar=False).to(device)
 
@@ -78,6 +75,9 @@ def is_speech(chunk):
     return VAD.is_speech(chunk, RATE)
 
 def record_audio():
+    """
+    Record incoming audio via microphone and then assess if Key Phrase is there, if so record it. Subject to silence and length constraints.
+    """
     stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK_SIZE)
     frames, start_time, last_speech_time = [], time.time(), time.time()
 
@@ -140,10 +140,11 @@ def listen_and_transcribe():
         print("Stopping...")
 
 def talk_audio(talk):
+    """
+    Respond out loud with TTS.
+    """
     tts.tts_to_file(text=talk)
 
 if __name__ == "__main__":
     thread = threading.Thread(target=listen_and_transcribe)
     thread.start()
-
-
