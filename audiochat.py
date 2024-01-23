@@ -1,9 +1,13 @@
 import time
 import pyaudio
 import json
+import os
 import requests
 import whisper
 import webrtcvad
+import torch
+from TTS.api import TTS
+import IPython.display as ipd
 import threading
 import numpy as np
 from dotenv import load_dotenv
@@ -24,6 +28,15 @@ VAD = webrtcvad.Vad(1)
 
 # Initialize PyAudio
 audio = pyaudio.PyAudio()
+
+# Get device
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+# List available 🐸TTS models
+print(TTS().list_models())
+
+# Init TTS with the target model name
+tts = TTS(model_name="tts_models/de/thorsten/tacotron2-DDC", progress_bar=False).to(device)
 
 # Load Whisper model
 whisper_model = whisper.load_model("base")
@@ -122,8 +135,12 @@ def listen_and_transcribe():
                 prompt = f"Answer the question as asked, precisely and succinctly. This is a conversation, not an essay. Question: {question}"
                 response = ask_llm(prompt)
                 print("Response:", response)
+                talk_audio(response)
     except KeyboardInterrupt:
         print("Stopping...")
+
+def talk_audio(talk):
+    tts.tts_to_file(text=talk)
 
 if __name__ == "__main__":
     thread = threading.Thread(target=listen_and_transcribe)
