@@ -5,14 +5,14 @@ import os
 import requests
 import whisper
 import webrtcvad
-import torch
-from TTS.api import TTS
-import IPython.display as ipd
 import threading
 import numpy as np
+from gtts import gTTS
+from playsound import playsound
+import os
+import warnings
 from dotenv import load_dotenv
 load_dotenv()
-import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module='whisper')
 
 # Constants
@@ -28,12 +28,7 @@ VAD = webrtcvad.Vad(1)
 
 # Initialize PyAudio
 audio = pyaudio.PyAudio()
-
-# Get device
-device = "cuda" if torch.cuda.is_available() else "cpu"
-
-# Init TTS with the target model name
-tts = TTS(model_name="tts_models/de/thorsten/tacotron2-DDC", progress_bar=False).to(device)
+language = 'en'
 
 # Load Whisper model
 whisper_model = whisper.load_model("base")
@@ -143,7 +138,12 @@ def talk_audio(talk):
     """
     Respond out loud with TTS.
     """
-    tts.tts_to_file(text=talk)
+    myobj = gTTS(text= "Hello World What's going on?", lang=language, slow=False)
+    filename = "speak.mp3"
+    myobj.save(filename)
+    playsound(filename)
+    # Delete the file after playing
+    os.remove(filename)
 
 if __name__ == "__main__":
     thread = threading.Thread(target=listen_and_transcribe)
